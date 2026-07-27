@@ -1,0 +1,53 @@
+# Python caches and environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Native/PyTorch extension build outputs
+build/
+dist/
+*.egg-info/
+*.obj
+*.o
+*.lib
+*.exp
+*.pyd
+*.so
+*.dll
+.ninja_deps
+.ninja_log
+
+# Datasets, local manifests, checkpoints, and experiment outputs
+data/
+data_json/*.json
+checkpoints/
+weights/
+pretrained/
+outputs/
+runs/
+wandb/
+
+# Common model artifacts
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.bin
+*.tar
+
+# Local logs and temporary files
+*.log
+*.tmp
+*.temp

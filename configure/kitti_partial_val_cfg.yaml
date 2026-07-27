@@ -1,0 +1,50 @@
+################################################################################
+# Partial KITTI validation config for quick inference smoke tests.
+################################################################################
+path:
+  data_root: ""
+  loadmodel: "./checkpoints/SLFNet/kitti.tar"
+  savemodel: "./checkpoints/SLFNet"
+  split_json: "./data_json/kitti_partial_val_32.json"
+
+environment:
+  use_cuda: True
+  seed: 7240
+  reemerge: True
+  only_test: True
+
+train:
+  max_epochs: 25
+  batch_size: 8
+  lr: 0.001
+  report_batch: 20
+  show_scans: True
+  workers: 0
+  gpus_id: "0"
+
+test:
+  split: "val"
+  batch_size: 1
+  workers: 0
+  max_samples: 8
+  gpus_id: "0"
+
+model:
+  model_name: "SLFNet"
+  max_disp: 192
+  max_depth: 100
+
+  nlspn:
+    prop_time: 19
+    affinity: "TC"
+    affinity_gamma: 1.0
+    conf_prop: True
+    preserve_input: True
+    legacy: False
+
+loss:
+  predict_weight: 1.0
+  PAM_weight: 0.5
+  smooth_weight: 0.1
+  photometric_weight: 0.5
+  SSIM_weight: 0.85

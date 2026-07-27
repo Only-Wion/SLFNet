@@ -7,7 +7,7 @@ $Script:RemoteSshKey = if ($env:CODEX_REMOTE_SSH_KEY) { $env:CODEX_REMOTE_SSH_KE
 $Script:RemoteProject = if ($env:CODEX_REMOTE_PROJECT) { $env:CODEX_REMOTE_PROJECT } else { '/mnt/data/jianglai/SLFNet' }
 $Script:RemoteBranch = if ($env:CODEX_REMOTE_BRANCH) { $env:CODEX_REMOTE_BRANCH } else { 'main' }
 $Script:RemoteOrigin = if ($env:CODEX_REMOTE_ORIGIN) { $env:CODEX_REMOTE_ORIGIN } else { 'git@github.com-slfnet-a-stereo-and-lidar-fusion-network-for-depth-completion-main:Only-Wion/SLFNet.git' }
-$Script:RemoteSetup = if ($env:CODEX_REMOTE_SETUP) { $env:CODEX_REMOTE_SETUP } else { 'source ~/miniconda3/etc/profile.d/conda.sh 2>/dev/null || source ~/anaconda3/etc/profile.d/conda.sh 2>/dev/null || true' }
+$Script:RemoteSetup = if ($env:CODEX_REMOTE_SETUP) { $env:CODEX_REMOTE_SETUP } else { 'source ~/miniconda3/etc/profile.d/conda.sh && conda activate slfnet-l20 && export CUDA_HOME="$CONDA_PREFIX" && export PATH="$CUDA_HOME/bin:$PATH" && export TORCH_CUDA_ARCH_LIST=8.9' }
 $Script:RemoteGithubHostAlias = if ($env:CODEX_REMOTE_GITHUB_HOST_ALIAS) { $env:CODEX_REMOTE_GITHUB_HOST_ALIAS } else { 'github.com-slfnet-a-stereo-and-lidar-fusion-network-for-depth-completion-main' }
 $Script:RemoteDeployKeyPath = if ($env:CODEX_REMOTE_DEPLOY_KEY_PATH) { $env:CODEX_REMOTE_DEPLOY_KEY_PATH } else { '~/.ssh/codex_deploy_keys/slfnet-a-stereo-and-lidar-fusion-network-for-depth-completion-main_ed25519' }
 $Script:RemoteTarget = "$Script:RemoteUser@$Script:RemoteHost"

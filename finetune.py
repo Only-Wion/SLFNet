@@ -14,6 +14,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--log-file", default=None)
     return parser.parse_args()
 
 
@@ -159,7 +160,7 @@ def main():
     scaler = GradScaler(enabled=args["train"]["amp"])
     save_dir = args["path"]["savemodel"]
     os.makedirs(save_dir, exist_ok=True)
-    log_path = args["path"].get("train_log", os.path.join(save_dir, "train.log"))
+    log_path = cli_args.log_file or args["path"].get("train_log", os.path.join(save_dir, "train.log"))
     logger = TrainingLogger(log_path)
     logger(f"TRAINING_START config={cli_args.config} dry_run={cli_args.dry_run}")
 

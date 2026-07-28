@@ -124,7 +124,7 @@ class SDGDepth(BaseDataset):
         )
         dep1 = torch.from_numpy(np.ascontiguousarray(depth_left))[None]
         dep2 = torch.from_numpy(np.ascontiguousarray(depth_right))[None]
-        gt_depth = TF.to_tensor(np.asarray(dense, dtype=np.float32))
+        gt_depth = TF.to_tensor(np.array(dense, dtype=np.float32, copy=True))
         calib = torch.tensor([baseline, K_np[0, 0]], dtype=torch.float32)
         disp1 = torch.where(dep1 > 0, calib.prod() / dep1.clamp_min(1e-8), 0)
         disp2 = torch.where(dep2 > 0, calib.prod() / dep2.clamp_min(1e-8), 0)

@@ -48,7 +48,15 @@ else:
     torch.backends.cudnn.benchmark = True
 
 ################################## 用于加载数据集的函数 #################################
-from dataset import kittidc as DA
+dataset_name = args.get("dataset", {}).get("name", "kittidc").lower()
+if dataset_name == "kittidc":
+    from dataset import kittidc as DA
+    dataset_class = DA.KITTIDC
+elif dataset_name == "sdg_depth":
+    from dataset import sdg_depth as DA
+    dataset_class = DA.SDGDepth
+else:
+    raise ValueError(f"Unsupported dataset: {dataset_name}")
 
 # 是否丢弃最后一个 batch, 多 GPU 下丢弃避免分配不均报错
 drop_last = False
@@ -58,14 +66,14 @@ if len(args["train"]["gpus_id"]) > 1:
 # 加载数据集
 if args["environment"]["only_test"]:
     TestImgLoader = torch.utils.data.DataLoader(                            # 加载测试集
-         DA.KITTIDC(args, args["test"]["split"]),
+         dataset_class(args, args["test"]["split"]),
          batch_size = args["test"].get("batch_size", 1), shuffle = False, num_workers = args["test"].get("workers", 0), drop_last = False)
 else:
     TrainImgLoader = torch.utils.data.DataLoader(
-             DA.KITTIDC(args, 'train'),
+             dataset_class(args, 'train'),
              batch_size = args["train"]["batch_size"], shuffle = True,  num_workers = args["train"].get("workers", 0), drop_last = drop_last)
     ValImgLoader = torch.utils.data.DataLoader(                            # 加载验证集
-             DA.KITTIDC(args, 'val'),
+             dataset_class(args, 'val'),
              batch_size = args["train"]["batch_size"], shuffle = False, num_workers = args["train"].get("workers", 0), drop_last = drop_last)
 
 #################################### 导入模型 ###############################

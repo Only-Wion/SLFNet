@@ -1,0 +1,55 @@
+path:
+  data_root: "/mnt/data/jianglai/artifacts/SDG-Depth-main/batch_organized"
+  loadmodel: "./checkpoints/SLFNet/kitti.tar"
+  savemodel: "./checkpoints/SLFNet"
+  split_json: "/mnt/data/jianglai/artifacts/SLFNet_sdg/2025-06-26-23-29-56.json"
+
+dataset:
+  name: "sdg_depth"
+
+data:
+  resize_size: [768, 1024]
+  input_size: [614, 820]
+  input_crop: [77, 102]
+  output_crop: [256, 800]
+
+environment:
+  use_cuda: true
+  seed: 7240
+  reemerge: true
+  only_test: true
+
+train:
+  max_epochs: 25
+  batch_size: 1
+  lr: 0.001
+  report_batch: 20
+  show_scans: false
+  workers: 0
+  gpus_id: "1"
+
+test:
+  split: "test"
+  batch_size: 1
+  workers: 0
+  max_samples: 1
+  gpus_id: "1"
+
+model:
+  model_name: "SLFNet"
+  max_disp: 192
+  max_depth: 100
+  nlspn:
+    prop_time: 19
+    affinity: "TC"
+    affinity_gamma: 1.0
+    conf_prop: true
+    preserve_input: true
+    legacy: false
+
+loss:
+  predict_weight: 1.0
+  PAM_weight: 0.5
+  smooth_weight: 0.1
+  photometric_weight: 0.5
+  SSIM_weight: 0.85

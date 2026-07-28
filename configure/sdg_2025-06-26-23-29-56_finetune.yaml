@@ -34,7 +34,7 @@ train:
   grad_clip: 1.0
   amp: false
   workers: 4
-  gpus_id: "1"
+  gpus_id: "2"
   save_every: 5
   early_stopping_patience: 10
 
@@ -42,7 +42,7 @@ test:
   split: "val"
   batch_size: 1
   workers: 2
-  gpus_id: "1"
+  gpus_id: "2"
 
 model:
   model_name: "SLFNet"

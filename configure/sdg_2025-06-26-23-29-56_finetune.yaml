@@ -32,7 +32,7 @@ train:
   warmup_epochs: 3
   weight_decay: 0.00001
   grad_clip: 1.0
-  amp: true
+  amp: false
   workers: 4
   gpus_id: "1"
   save_every: 5

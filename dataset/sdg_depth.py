@@ -51,12 +51,18 @@ class SDGDepth(BaseDataset):
         self.input_h, self.input_w = data_args.get("input_size", [614, 820])
         self.crop_top, self.crop_left = data_args.get("input_crop", [77, 102])
         self.output_crop = data_args.get("output_crop")
+        self.sparse_dropout = float(data_args.get("sparse_dropout", 0.0)) if mode == "train" else 0.0
+        self.photometric_augmentation = bool(data_args.get("photometric_augmentation", False)) and mode == "train"
+        self.brightness = float(data_args.get("brightness", 0.0))
+        self.contrast = float(data_args.get("contrast", 0.0))
+        self.gamma = float(data_args.get("gamma", 0.0))
 
     def __len__(self):
         return len(self.sample_list)
 
     def _path(self, sample, key):
-        return os.path.join(self.root, sample[key])
+        path = sample[key]
+        return path if os.path.isabs(path) else os.path.join(self.root, path)
 
     def _resize_and_crop(self, image, resample):
         image = image.resize((self.resize_w, self.resize_h), resample=resample)
@@ -88,6 +94,10 @@ class SDGDepth(BaseDataset):
             depth = sparse["depth_gt_m"].astype(np.float32)
             K_np = sparse["effective_rectified_K"].astype(np.float32)
 
+        if self.sparse_dropout > 0:
+            keep = np.random.random(depth.shape) >= self.sparse_dropout
+            u, v, depth = u[keep], v[keep], depth[keep]
+
         baseline = float(sample["baseline_m"])
         disparity = K_np[0, 0] * baseline / np.maximum(depth, 1e-8)
         right_u = np.rint(u - disparity).astype(np.int64)
@@ -115,6 +125,13 @@ class SDGDepth(BaseDataset):
             K1[1, 2] -= top
             K2[0, 2] -= left_offset
             K2[1, 2] -= top
+
+        if self.photometric_augmentation:
+            brightness = 1.0 + np.random.uniform(-self.brightness, self.brightness)
+            contrast = 1.0 + np.random.uniform(-self.contrast, self.contrast)
+            gamma = 1.0 + np.random.uniform(-self.gamma, self.gamma)
+            left = TF.adjust_gamma(TF.adjust_contrast(TF.adjust_brightness(left, brightness), contrast), gamma)
+            right = TF.adjust_gamma(TF.adjust_contrast(TF.adjust_brightness(right, brightness), contrast), gamma)
 
         rgb1 = TF.normalize(
             TF.to_tensor(left), (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)

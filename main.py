@@ -336,6 +336,7 @@ def batch_test(data):
     loss_dict['MAE']   = metrics_result[0,1]*1000
     loss_dict['iMAE']  = metrics_result[0,3]*1000
     loss_dict['iRMSE'] = metrics_result[0,2]*1000
+    loss_dict['REL']   = metrics_result[0,4]
 
     return loss_dict, running_time
 
@@ -360,7 +361,7 @@ def model_test():
 
         start_time = time.time()
         test_loss, running_time = batch_test(data)
-        print('Iter:%d | Total:%d. Test loss = %.3f , time = %.2f' %(batch_idx + 1, len(TestImgLoader), test_loss['RMSE'], running_time))
+        print('Iter:%d | Total:%d. RMSE = %.3f mm, REL = %.6f, time = %.2f' %(batch_idx + 1, len(TestImgLoader), test_loss['RMSE'], test_loss['REL'], running_time))
 
         loss_list.append(test_loss)
         time_list.append(running_time)

@@ -2,6 +2,7 @@ path:
   data_root: "/mnt/data/jianglai/artifacts/SDG-Depth-main/batch_organized"
   loadmodel: "./checkpoints/SLFNet/kitti.tar"
   savemodel: "/mnt/data/jianglai/artifacts/SLFNet_sdg/finetune_2025-06-26-23-29-56"
+  train_log: "/mnt/data/jianglai/artifacts/SLFNet_sdg/finetune_2025-06-26-23-29-56/train.log"
   split_json: "/mnt/data/jianglai/artifacts/SLFNet_sdg/2025-06-26-23-29-56_fastlio.json"
 
 dataset:

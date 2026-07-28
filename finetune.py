@@ -110,6 +110,17 @@ def learning_rate(epoch, total_epochs, base_lr, warmup_epochs, min_lr):
     return min_lr + 0.5 * (base_lr - min_lr) * (1 + math.cos(math.pi * progress))
 
 
+class TrainingLogger:
+    def __init__(self, path):
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        self.handle = open(path, "a", encoding="utf-8", buffering=1)
+
+    def __call__(self, message):
+        print(message, flush=True)
+        self.handle.write(message + "\n")
+        self.handle.flush()
+
+
 def main():
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is required for SLFNet fine-tuning")
@@ -148,6 +159,9 @@ def main():
     scaler = GradScaler(enabled=args["train"]["amp"])
     save_dir = args["path"]["savemodel"]
     os.makedirs(save_dir, exist_ok=True)
+    log_path = args["path"].get("train_log", os.path.join(save_dir, "train.log"))
+    logger = TrainingLogger(log_path)
+    logger(f"TRAINING_START config={cli_args.config} dry_run={cli_args.dry_run}")
 
     best_rmse = float("inf")
     stale_epochs = 0
@@ -182,7 +196,7 @@ def main():
             scaler.update()
             epoch_loss += loss.item()
             if cli_args.dry_run:
-                print(
+                logger(
                     f"DRY_RUN_OK loss={loss.item():.6f} "
                     f"grad_norm={float(gradient_norm):.6f} "
                     f"peak_memory_gb={torch.cuda.max_memory_allocated()/2**30:.3f}"
@@ -192,11 +206,10 @@ def main():
         scores = validation_metrics(model, val_loader, metric)
         train_loss = epoch_loss / len(train_loader)
         rmse_mm = float(scores[0] * 1000)
-        print(
+        logger(
             f"epoch={epoch + 1:03d} lr={lr:.7f} train_loss={train_loss:.6f} "
             f"val_rmse_mm={rmse_mm:.3f} val_mae_mm={scores[1]*1000:.3f} "
-            f"time_s={time.time()-started:.1f}",
-            flush=True,
+            f"val_rel={scores[4]:.6f} time_s={time.time()-started:.1f}"
         )
         checkpoint = {
             "epoch": epoch + 1,
@@ -215,9 +228,9 @@ def main():
         else:
             stale_epochs += 1
             if stale_epochs >= args["train"]["early_stopping_patience"]:
-                print(f"early_stop epoch={epoch + 1} best_rmse_mm={best_rmse:.3f}")
+                logger(f"early_stop epoch={epoch + 1} best_rmse_mm={best_rmse:.3f}")
                 break
-    print(f"TRAINING_DONE best_rmse_mm={best_rmse:.3f}")
+    logger(f"TRAINING_DONE best_rmse_mm={best_rmse:.3f}")
 
 
 if __name__ == "__main__":

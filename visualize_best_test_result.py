@@ -12,6 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
     parser.add_argument("--output", required=True)
+    parser.add_argument("--frame", default=None)
     return parser.parse_args()
 
 
@@ -61,6 +62,9 @@ def main():
     best = None
     with torch.no_grad():
         for index, batch in enumerate(loader):
+            frame = dataset.sample_list[index]["frame"]
+            if cli_args.frame is not None and frame != cli_args.frame:
+                continue
             rgb_cpu = batch["rgb1"][0].clone()
             batch = {key: value.cuda(non_blocking=True) for key, value in batch.items()}
             output = model(batch)
@@ -85,7 +89,7 @@ def main():
                 error_map[valid] = torch.abs(difference[valid]) / ground_truth[valid]
                 best = {
                     "index": index,
-                    "frame": dataset.sample_list[index]["frame"],
+                    "frame": frame,
                     "rel": rel,
                     "rmse_mm": rmse_mm,
                     "mae_mm": mae_mm,
@@ -94,7 +98,11 @@ def main():
                     "ground_truth": ground_truth.cpu().numpy(),
                     "error": error_map.cpu().numpy(),
                 }
+                if cli_args.frame is not None:
+                    break
 
+    if best is None:
+        raise ValueError(f"Frame not found in test split: {cli_args.frame}")
     valid_depth = best["ground_truth"] > 0
     depth_values = best["ground_truth"][valid_depth]
     depth_min, depth_max = np.percentile(depth_values, [1, 99])
@@ -133,9 +141,9 @@ def main():
 
     for axis in axes.flat:
         axis.axis("off")
+    title = "SLFNet test inference" if cli_args.frame else "SLFNet best test result by relative error"
     figure.suptitle(
-        "SLFNet best test result by relative error"
-        f"  |  MAE {best['mae_mm']:.1f} mm",
+        title + f"  |  MAE {best['mae_mm']:.1f} mm",
         fontsize=15,
     )
 
